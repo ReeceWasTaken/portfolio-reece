@@ -78,3 +78,10 @@ function App() {
   </div>;
 }
 createRoot(document.getElementById('root')).render(<App/>);
+{certificationRoadmap.map((cert) => (
+  <div className="cert-card" key={cert.name}>
+    <h3>{cert.name}</h3>
+    <p>{cert.description}</p>
+    <span>{cert.status}</span>
+  </div>
+))}
