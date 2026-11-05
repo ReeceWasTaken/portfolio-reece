@@ -19,3 +19,25 @@ export const skills = [
   { group: 'NETWORKING', items: ['TCP/IP', 'Subnetting', 'VLANs', 'Routing & Switching'] },
   { group: 'TOOLS & DEVELOPMENT', items: ['Python', 'Git & GitHub', 'Linux', 'Wireshark'] },
 ];
+export const certificationRoadmap = [
+  {
+    name: "Cisco CCNA",
+    description: "Networking, routing, switching, and infrastructure security.",
+    status: "Next Target"
+  },
+  {
+    name: "Cisco CCNP Security",
+    description: "Advanced network security, firewalls, VPNs, and secure infrastructure.",
+    status: "Planned"
+  },
+  {
+    name: "GIAC GCIH",
+    description: "Incident handling, attack techniques, threat detection, and response.",
+    status: "Planned"
+  },
+  {
+    name: "OffSec OSCP+",
+    description: "Hands-on penetration testing, exploitation, and privilege escalation.",
+    status: "Long-Term Goal"
+  }
+];
