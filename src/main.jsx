@@ -79,10 +79,28 @@ function App() {
   </div>;
 }
 createRoot(document.getElementById('root')).render(<App/>);
-{certificationRoadmap.map((cert) => (
-  <div className="cert-card" key={cert.name}>
-    <h3>{cert.name}</h3>
-    <p>{cert.description}</p>
-    <span>{cert.status}</span>
+
+<section id="certifications" className="section content-section">
+  <div className="section-head">
+    <span className="section-number">04 / CERTIFICATIONS</span>
+    <h2>
+      <span className="green">$</span> cat certifications.log
+    </h2>
+    <p>Certifications I'm working toward and future goals.</p>
   </div>
-))}
+
+  <div className="cert-grid">
+    {certificationRoadmap.map((cert) => (
+      <div className="cert-card" key={cert.name}>
+        <span className="cert-icon">[ + ]</span>
+        <div>
+          <h3>{cert.name}</h3>
+          <p>{cert.description}</p>
+          <span className="cert-state">
+            {cert.status.toUpperCase()}
+          </span>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
