@@ -30,7 +30,7 @@ function TerminalPanel({ onNavigate }) {
     const value = raw.trim();
     if (!value) return;
     const cmd = value.toLowerCase();
-setHistory(prev => [...prev, value]);
+    setHistory(prev => [...prev, value]);
     setHistoryIndex(-1);
     setInput('');
     if (cmd === 'clear') { setLines([]); return; }
@@ -86,17 +86,17 @@ function App() {
       <section id="projects" className="section content-section"><div className="section-head"><span className="section-number">02 / PROJECTS</span><h2><span className="green">$</span> ls ./projects/</h2><p>Selected builds and planned labs. Project links will activate when repository URLs are added.</p></div><div className="project-grid">{projects.map((project, i) => <article className="project-card" key={project.name}><div className="project-top"><span className="project-index">0{i+1} / {project.type}</span><span className={project.status === 'PLANNED' ? 'status planned' : 'status'}>{project.status}</span></div><div className="project-symbol"><Cpu size={25}/></div><h3>{project.name}</h3><p>{project.description}</p><div className="tags">{project.tags.map(tag => <span key={tag}>{tag}</span>)}</div>{project.link ? <a className="project-link" href={project.link} target="_blank" rel="noreferrer">VIEW REPOSITORY <ArrowUpRight size={15}/></a> : <span className="project-link inactive">REPOSITORY LINK PENDING</span>}</article>)}</div></section>
       {/* Technical skills loaded from src/data.js. */}
       <section id="skills" className="section content-section"><div className="section-head"><span className="section-number">03 / SKILLS</span><h2><span className="green">$</span> cat skills.json</h2></div><div className="skills-grid">{skills.map(group => <div className="skill-panel" key={group.group}><div className="skill-title"><span className="green">◆</span> {group.group}</div>{group.items.map(item => <div className="skill-item" key={item}><span className="green">›</span> {item}</div>)}</div>)}</div></section>
-      {/* Certification roadmap loaded from src/data.js; statuses are future goals, not earned credentials. */}
+      {/* Certification cards are generated from src/data.js, including completed credentials. */}
       <section id="certifications" className="section content-section">
         <div className="section-head">
           <span className="section-number">04 / CERTIFICATIONS</span>
           <h2><span className="green">$</span> cat certifications.log</h2>
-          <p>Certifications I'm working toward and future goals.</p>
+          <p>Completed certifications and future certification goals.</p>
         </div>
         <div className="cert-grid">
           {certificationRoadmap.map((cert) => (
             <div className="cert-card" key={cert.name}>
-              <span className="cert-icon">[ + ]</span>
+              <span className="cert-icon">{cert.status.toLowerCase() === 'completed' ? '[ ✓ ]' : '[ + ]'}</span>
               <div>
                 <h3>{cert.name}</h3>
                 <p>{cert.description}</p>
