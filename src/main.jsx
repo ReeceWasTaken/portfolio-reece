@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { ArrowUpRight, Github, Linkedin, Mail, Terminal, Shield, Cpu, ChevronRight, Download } from 'lucide-react';
 import { profile, projects, skills } from './data';
 import './style.css';
+import { certificationRoadmap } from "./data";
 
 const commands = ['help', 'whoami', 'status', 'education', 'projects', 'skills', 'certifications', 'contact', 'date', 'clear'];
 const intro = [
