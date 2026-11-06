@@ -7,7 +7,7 @@ export const profile = {
   github: 'https://github.com/ReeceWasTaken',
   linkedin: 'https://www.linkedin.com/in/reece-ludlow/',
   email: 'reeceludlow51802@gmail.com',
-  resume: 'Reece_Ludlow_Resume.pdf',
+  resume: 'public/Reece_Ludlow_Resume_2026.pdf',
 };
 
 // Featured and planned projects.
