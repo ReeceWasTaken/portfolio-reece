@@ -13,7 +13,7 @@ export const profile = {
 // Featured and planned projects.
 export const projects = [
   { name: 'PhishHook', type: 'THREAT DETECTION', status: 'FEATURED', description: 'Hybrid AI phishing detection project using a three-model voting approach. Reported approximately 90% accuracy during project evaluation.', tags: ['Python', 'Machine Learning', 'Email Security'], link: 'https://github.com/ReeceWasTaken/PhishHook' },
-  { name: 'Network Defense Lab', type: 'NETWORK SECURITY', status: 'PLANNED', description: 'A future hands-on lab documenting network segmentation, traffic analysis, and defensive controls.', tags: ['Wireshark', 'Networking', 'Firewall'], link: '' },
+  { name: 'Foxbat NIDS', type: 'NETWORK SECURITY', status: 'FEATURED', description: 'Windows network intrusion detection system featuring live packet monitoring, port scan and SYN flood detection, PCAP analysis, and a custom security dashboard.', tags: ['Python', 'Scapy', 'FastAPI'], link: 'https://github.com/ReeceWasTaken/Foxbat-NIDS' },
   { name: 'Security Automation', type: 'BLUE TEAM', status: 'PLANNED', description: 'A future project for automating repetitive security analysis and incident triage workflows.', tags: ['Python', 'Automation', 'SOC'], link: '' },
 ];
 

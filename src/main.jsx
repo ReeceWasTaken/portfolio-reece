@@ -75,13 +75,13 @@ function App() {
   const navigate = id => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const [menu, setMenu] = useState(false);
   // Project detail pages use a URL hash, so GitHub Pages needs no router configuration.
-  const [activeProject, setActiveProject] = useState(() => window.location.hash === '#project/phishhook' ? 'phishhook' : null);
+  const [activeProject, setActiveProject] = useState(() => ['#project/phishhook', '#project/foxbat'].includes(window.location.hash) ? window.location.hash.split('/')[1] : null);
   useEffect(() => {
-    const syncProject = () => setActiveProject(window.location.hash === '#project/phishhook' ? 'phishhook' : null);
+    const syncProject = () => setActiveProject(['#project/phishhook', '#project/foxbat'].includes(window.location.hash) ? window.location.hash.split('/')[1] : null);
     window.addEventListener('hashchange', syncProject);
     return () => window.removeEventListener('hashchange', syncProject);
   }, []);
-  const openProject = () => { window.location.hash = 'project/phishhook'; window.scrollTo(0, 0); };
+  const openProject = (slug) => { window.location.hash = 'project/' + slug; window.scrollTo(0, 0); };
   const closeProject = () => { window.location.hash = 'projects'; setActiveProject(null); setTimeout(() => navigate('projects'), 0); };
   return <div className="site">
     {/* Top navigation; mobile menu uses the menu state. */}
@@ -117,13 +117,46 @@ function App() {
           </div>
         </div>
       </main>
+    ) : activeProject === 'foxbat' ? (
+      <main className="project-detail section content-section" style={{maxWidth: 1100, margin: '0 auto', paddingTop: 100}}>
+        <button className="secondary" onClick={closeProject}>← BACK TO PROJECTS</button>
+        <div className="section-head" style={{marginTop: 32}}>
+          <span className="section-number">02 / FEATURED PROJECT · NETWORK SECURITY</span>
+          <h2><span className="green">$</span> cat projects/foxbat.md</h2>
+          <p>Foxbat NIDS — Windows Network Intrusion Detection System</p>
+        </div>
+        <p className="lead">A Python-based defensive security application for inspecting network traffic, identifying suspicious patterns, and reviewing alerts in a custom desktop dashboard.</p>
+        <div className="tags" style={{marginBottom: 24}}><span>Python</span><span>Scapy</span><span>FastAPI</span><span>SQLite</span><span>WebView2</span></div>
+        <div className="about-grid">
+          <div>
+            <h3 className="green">// PROJECT OVERVIEW</h3>
+            <p>Foxbat NIDS combines live packet capture and offline PCAP analysis with a Windows desktop dashboard inspired by classic network monitoring terminals.</p>
+            <h3 className="green">// DETECTION CAPABILITIES</h3>
+            <p>Rule-based detection for suspicious network activity, including port scanning and SYN flood patterns. Detection events and severity information are stored locally in SQLite for later review.</p>
+            <h3 className="green">// DESKTOP APPLICATION</h3>
+            <p>FastAPI serves the local dashboard inside a frameless pywebview / Microsoft Edge WebView2 window. The v0.8.14 release includes a stability fix for the desktop JavaScript bridge.</p>
+            <h3 className="green">// PROJECT LINKS</h3>
+            <a className="project-link" href="https://github.com/ReeceWasTaken/Foxbat-NIDS" target="_blank" rel="noreferrer">VIEW GITHUB REPOSITORY <ArrowUpRight size={16}/></a>
+            <a className="project-link" href="https://github.com/ReeceWasTaken/Foxbat-NIDS/releases/tag/v0.8.14" target="_blank" rel="noreferrer">VIEW WINDOWS RELEASE <ArrowUpRight size={16}/></a>
+          </div>
+          <div className="info-panel">
+            <div className="panel-title"><Shield size={16}/> PROJECT.DATA</div>
+            <div className="info-row"><span>PROJECT</span><strong>Foxbat NIDS</strong></div>
+            <div className="info-row"><span>DOMAIN</span><strong>Network Intrusion Detection</strong></div>
+            <div className="info-row"><span>METHOD</span><strong>Rule-Based Packet Analysis</strong></div>
+            <div className="info-row"><span>PLATFORM</span><strong>Windows Desktop</strong></div>
+            <div className="info-row"><span>VERSION</span><strong>v0.8.14</strong></div>
+            <div className="info-row"><span>STATUS</span><strong className="green">Published on GitHub</strong></div>
+          </div>
+        </div>
+      </main>
     ) : <main>
       {/* Hero and interactive terminal. */}
       <section id="home" className="hero section"><div className="hero-copy"><div className="eyebrow"><span className="green">//</span> SYSTEM ACCESS GRANTED <span className="line"/></div><p className="hero-kicker">HELLO WORLD, I'M</p><h1>{profile.name}<span className="green">.</span></h1><div className="title-line"><span className="green">&gt;</span> {profile.title}<span className="cursor">_</span></div><p className="hero-summary">{profile.summary}</p><div className="actions"> <button className="primary" onClick={() => navigate('projects')} > EXPLORE PROJECTS <ArrowUpRight size={16} /> </button> {profile.resume && ( <a className="secondary" href={profile.resume} target="_blank" rel="noopener noreferrer" > <Download size={16} /> RESUME </a> )} </div> <div className="hero-contact"> <button onClick={() => navigate('contact')}> <Mail size={15} /> GET IN TOUCH <ArrowUpRight size={14} /> </button> </div><div className="system-strip"><span><span className="green">●</span> SECURITY CONSOLE</span><span>PORTFOLIO / V2.0</span><span>STATUS: ONLINE</span></div><div className="hero-meta"><span><span className="green">●</span> BUILDING & LEARNING</span><span>BASED IN THE USA</span></div></div><div className="hero-terminal"><div className="terminal-label"><Terminal size={15}/> INTERACTIVE SHELL <span>v2.0</span></div><TerminalPanel onNavigate={navigate}/><div className="terminal-hint">TIP: TRY <code>help</code>, <code>status</code> OR <code>education</code></div></div></section>
       {/* Background and education summary. */}
       <section id="about" className="section content-section"><div className="section-head"><span className="section-number">01 / ABOUT</span><h2><span className="green">$</span> cat about_me.txt</h2></div><div className="about-grid"><div><p className="lead">Cybersecurity isn't just what I studied. It's what I build.</p><p>I'm a cybersecurity graduate interested in network defense, security operations, and developing tools that make systems safer. I enjoy translating theory into hands-on projects and documenting what I learn along the way.</p><p>My portfolio highlights practical work, including an AI-assisted phishing detection system, as well as ongoing networking and defensive security projects.</p></div><div className="info-panel"><div className="panel-title"><Shield size={16}/> PROFILE.DATA</div><div className="info-row"><span>EDUCATION</span><strong>B.S. Cybersecurity</strong></div><div className="info-row"><span>ACADEMIC HONORS</span><strong>Cum Laude</strong></div><div className="info-row"><span>FOCUS</span><strong>Blue Team / Networking</strong></div><div className="info-row"><span>STATUS</span><strong className="green">Open to Opportunities</strong></div></div></div></section>
       {/* Project cards loaded from src/data.js. */}
-      <section id="projects" className="section content-section"><div className="section-head"><span className="section-number">02 / PROJECTS</span><h2><span className="green">$</span> ls ./projects/</h2><p>Selected builds and planned labs. Featured work and planned labs. Explore PhishHook or view its source code on GitHub.</p></div><div className="project-grid">{projects.map((project, i) => <article className="project-card" key={project.name}><div className="project-top"><span className="project-index">0{i+1} / {project.type}</span><span className={project.status === 'PLANNED' ? 'status planned' : 'status'}>{project.status}</span></div><div className="project-symbol"><Cpu size={25}/></div><h3>{project.name}</h3><p>{project.description}</p><div className="tags">{project.tags.map(tag => <span key={tag}>{tag}</span>)}</div>{project.name === 'PhishHook' && <button className="secondary" onClick={openProject}>VIEW PROJECT <ChevronRight size={15}/></button>}{project.link ? <a className="project-link" href={project.link} target="_blank" rel="noreferrer">GITHUB REPOSITORY <ArrowUpRight size={15}/></a> : <span className="project-link inactive">REPOSITORY LINK PENDING</span>}</article>)}</div></section>
+      <section id="projects" className="section content-section"><div className="section-head"><span className="section-number">02 / PROJECTS</span><h2><span className="green">$</span> ls ./projects/</h2><p>Featured security projects and ongoing labs. Explore PhishHook and Foxbat NIDS or view their source code on GitHub.</p></div><div className="project-grid">{projects.map((project, i) => <article className="project-card" key={project.name}><div className="project-top"><span className="project-index">0{i+1} / {project.type}</span><span className={project.status === 'PLANNED' ? 'status planned' : 'status'}>{project.status}</span></div><div className="project-symbol"><Cpu size={25}/></div><h3>{project.name}</h3><p>{project.description}</p><div className="tags">{project.tags.map(tag => <span key={tag}>{tag}</span>)}</div>{(project.name === 'PhishHook' || project.name === 'Foxbat NIDS') && <button className="secondary" onClick={() => openProject(project.name === 'PhishHook' ? 'phishhook' : 'foxbat')}>VIEW PROJECT <ChevronRight size={15}/></button>}{project.link ? <a className="project-link" href={project.link} target="_blank" rel="noreferrer">GITHUB REPOSITORY <ArrowUpRight size={15}/></a> : <span className="project-link inactive">REPOSITORY LINK PENDING</span>}</article>)}</div></section>
       {/* Technical skills loaded from src/data.js. */}
       <section id="skills" className="section content-section"><div className="section-head"><span className="section-number">03 / SKILLS</span><h2><span className="green">$</span> cat skills.json</h2></div><div className="skills-grid">{skills.map(group => <div className="skill-panel" key={group.group}><div className="skill-title"><span className="green">◆</span> {group.group}</div>{group.items.map(item => <div className="skill-item" key={item}><span className="green">›</span> {item}</div>)}</div>)}</div></section>
       {/* Certification cards are generated from src/data.js, including completed credentials. */}
