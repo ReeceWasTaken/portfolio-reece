@@ -39,7 +39,7 @@ a {
 
 .site {
   min-height: 100vh;
-  background: radial-gradient(ellipse at 68% 16%, var(--theme-color-4, rgba(39, 91, 55, .13)), transparent 34%), var(--theme-color-2, #080d0b)
+  background: var(--theme-color-2, #080d0b)
 }
 
 .site:before {
