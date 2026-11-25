@@ -5,7 +5,6 @@ import { createRoot } from 'react-dom/client';
 import { ArrowUpRight, Github, Linkedin, Mail, Terminal, Shield, Cpu, ChevronRight, Download } from 'lucide-react';
 import { profile, projects, skills, certificationRoadmap } from './data';
 import './style.css';
-import Briefing from './Briefing';
 
 // Each hidden session has its own prompt and Matrix palette.
 const sessions = {
@@ -60,10 +59,7 @@ function TerminalPanel({ onNavigate, mode, setMode, onMatrix, onTransition }) {
     if (cmd === 'clear') { setLines([]); return; }
     const output = [];
     // Hidden cosmetic root session; no real privileges are granted.
-    if (cmd === 'briefing') {
-      window.location.hash = '/briefing';
-      output.push({ type: 'success', text: '[ OK ] Opening Operation Overwatch.' });
-    } else if (cmd === 'matrix') {
+    if (cmd === 'matrix') {
       onMatrix();
       output.push({ type: 'success', text: '[ OK ] Matrix session initialized.' });
     } else if (cmd === 'sudo su') {
@@ -228,13 +224,6 @@ function App() {
     window.addEventListener('hashchange', syncProject);
     return () => window.removeEventListener('hashchange', syncProject);
   }, []);
-  const [briefing, setBriefing] = useState(() => window.location.hash === '#/briefing');
-  useEffect(() => {
-    const sync = () => setBriefing(window.location.hash === '#/briefing');
-    window.addEventListener('hashchange', sync);
-    return () => window.removeEventListener('hashchange', sync);
-  }, []);
-  const closeBriefing = React.useCallback(() => { window.location.hash = 'home'; window.scrollTo(0, 0); }, []);
   const openProject = (slug) => { window.location.hash = 'project/' + slug; window.scrollTo(0, 0); };
   const closeProject = () => { window.location.hash = 'projects'; setActiveProject(null); setTimeout(() => navigate('projects'), 0); };
   return <div className={'site' + (mode === 'standard' ? '' : ' ' + mode + '-mode')}>
@@ -336,7 +325,6 @@ function App() {
       {/* Contact links; resume appears only when profile.resume has a URL. */}
       <section id="contact" className="section content-section contact-section"><div className="section-head"><span className="section-number">05 / CONTACT</span><h2><span className="green">$</span> ./connect.sh</h2></div><p className="lead">Let's build something secure.</p><p>Interested in connecting about cybersecurity, security engineering, or technical opportunities? Reach out below.</p><div className="contact-links"><a href={'mailto:'+profile.email}><Mail size={18}/> EMAIL <ArrowUpRight size={16}/></a><a href={profile.github} target="_blank" rel="noreferrer"><Github size={18}/> GITHUB <ArrowUpRight size={16}/></a><a href={profile.linkedin} target="_blank" rel="noreferrer"><Linkedin size={18}/> LINKEDIN <ArrowUpRight size={16}/></a>{profile.resume && <a href={profile.resume} target="_blank" rel="noreferrer"><Download size={18}/> RESUME <ArrowUpRight size={16}/></a>}</div></section>
     </main>}
-    {briefing && <Briefing onClose={closeBriefing}/>}
     {transition && <GameTransition key={transition} kind={transition} onClose={closeTransition}/>}
     {matrixMode && <MatrixRain mode={mode} onClose={closeMatrix}/>}
     {/* Footer and back-to-top link. */}
