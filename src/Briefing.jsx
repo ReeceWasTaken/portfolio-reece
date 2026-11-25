@@ -56,10 +56,10 @@ export default function Briefing({onClose}) {
   <div className="ow-strip"><span>MISSION 01 — GLOBAL SURVEILLANCE</span><span>UNCLASSIFIED // OSINT</span></div>
   <div className="ow-layout"><section className="ow-map-panel"><div className="ow-panel-head">GLOBAL TACTICAL DISPLAY <span>{showDemo?'SIMULATION CONTACTS':'NO GEOLOCATED FEED'}</span></div>
    <div className="ow-map"><svg viewBox={`${center[0]-width/2} ${center[1]-height/2} ${width} ${height}`} aria-label="World map with fictional demonstration contacts">
-    <defs><pattern id="ow-grid" width="37.5" height="37.5" patternUnits="userSpaceOnUse"><path d="M37.5 0H0V37.5" fill="none" stroke="#35545a" strokeWidth=".6"/></pattern></defs>
-    <rect width="900" height="450" fill="#101f27"/><rect width="900" height="450" fill="url(#ow-grid)"/>
-    <g fill="#294449" stroke="#75918d" strokeWidth=".65">{world.map((d,i)=><path key={i} d={d}/>)}</g>
-    <path d="M0 225H900 M450 0V450" stroke="#72918f" strokeDasharray="5 5" opacity=".5"/>
+    <defs><pattern id="ow-grid" width="37.5" height="37.5" patternUnits="userSpaceOnUse"><path d="M37.5 0H0V37.5" fill="none" stroke="#365475" strokeWidth=".6"/></pattern></defs>
+    <rect width="900" height="450" fill="#10243e"/><rect width="900" height="450" fill="url(#ow-grid)"/>
+    <g fill="#304d70" stroke="#7899be" strokeWidth=".65">{world.map((d,i)=><path key={i} d={d}/>)}</g>
+    <path d="M0 225H900 M450 0V450" stroke="#7899be" strokeDasharray="5 5" opacity=".5"/>
     {contacts.map(c=>{const [x,y]=project(c.lon,c.lat);return <g key={c.id} transform={`translate(${x} ${y})`} className={'ow-contact '+c.severity.toLowerCase()} role="button" tabIndex={0} aria-label={c.id+' fictional '+c.kind} onClick={()=>setSelected(c)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setSelected(c);}}}><circle r="13" className="ow-pulse"/><path d="M0 -7L7 0 0 7 -7 0Z"/><text x="10" y="-9">{c.id}</text></g>;})}
    </svg><div className="ow-sweep" aria-hidden="true"/></div>
    <div className="ow-controls"><button onClick={()=>{setZoom(z=>Math.min(3,z+.5));setCenter([450,225]);}}>ZOOM +</button><button onClick={()=>{setZoom(z=>Math.max(1,z-.5));setCenter([450,225]);}}>ZOOM −</button>{[['←',-40,0],['→',40,0],['↑',0,-30],['↓',0,30]].map(([label,x,y])=><button key={label} onClick={()=>pan(x,y)}>{label}</button>)}<button onClick={()=>{setZoom(1);setCenter([450,225]);}}>RESET</button><label><input type="checkbox" checked={showDemo} onChange={e=>{setShowDemo(e.target.checked);setSelected(null);}}/> DEMO CONTACTS</label></div>
