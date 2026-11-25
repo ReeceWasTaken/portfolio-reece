@@ -17,7 +17,7 @@ const intro = [
 ];
 
 // Interactive terminal: command history, keyboard navigation, and section shortcuts.
-function TerminalPanel({ onNavigate }) {
+function TerminalPanel({ onNavigate, rootMode, setRootMode }) {
   const [lines, setLines] = useState(intro);
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([]);
@@ -29,15 +29,23 @@ function TerminalPanel({ onNavigate }) {
   const execute = (raw) => {
     const value = raw.trim();
     if (!value) return;
-    const cmd = value.toLowerCase();
+    const cmd = value.toLowerCase().replace(/\s+/g, ' ');
     setHistory(prev => [...prev, value]);
     setHistoryIndex(-1);
     setInput('');
     if (cmd === 'clear') { setLines([]); return; }
     const output = [];
-    if (cmd === 'help') output.push({ type: 'normal', text: 'Available commands: ' + commands.join('  ·  ') });
-    else if (cmd === 'whoami') output.push({ type: 'success', text: profile.name + ' — ' + profile.title });
-    else if (cmd === 'status') output.push({ type: 'success', text: 'SYSTEM ONLINE | PORTFOLIO READY | OPEN TO OPPORTUNITIES' });
+    // Hidden cosmetic root session; no real privileges are granted.
+    if (cmd === 'sudo su') {
+      setRootMode(true);
+      output.push({ type: 'success', text: '[ ROOT ] Simulated superuser session activated.' });
+      output.push({ type: 'muted', text: 'Type exit to return to standard mode.' });
+    } else if (cmd === 'exit' || cmd === 'logout') {
+      setRootMode(false);
+      output.push({ type: 'success', text: rootMode ? '[ OK ] Root session terminated.' : 'Already in standard mode.' });
+    } else if (cmd === 'help') output.push({ type: 'normal', text: 'Available commands: ' + commands.join('  ·  ') });
+    else if (cmd === 'whoami') output.push({ type: 'success', text: rootMode ? 'root' : profile.name + ' — ' + profile.title });
+    else if (cmd === 'status') output.push({ type: 'success', text: rootMode ? 'SYSTEM ONLINE | ROOT ACCESS (SIMULATED) | UID: 0' : 'SYSTEM ONLINE | PORTFOLIO READY | OPEN TO OPPORTUNITIES' });
     else if (cmd === 'education') output.push({ type: 'normal', text: 'B.S. Cybersecurity — Cum Laude' });
     else if (cmd === 'certifications') { onNavigate('certifications'); output.push({ type: 'normal', text: 'Opening certification status ...' }); }
     else if (cmd === 'date') output.push({ type: 'normal', text: new Date().toLocaleString() });
@@ -45,7 +53,7 @@ function TerminalPanel({ onNavigate }) {
       onNavigate(cmd);
       output.push({ type: 'success', text: 'Opening /' + cmd + ' ...' });
     } else output.push({ type: 'error', text: `Command not found: ${value}. Type "help".` });
-    setLines(prev => [...prev, { type: 'command', text: value }, ...output]);
+    setLines(prev => [...prev, { type: 'command', text: value, root: rootMode }, ...output]);
   };
   // Up/down arrows cycle through previous commands; Enter runs a command.
   const onKeyDown = (event) => {
@@ -63,10 +71,10 @@ function TerminalPanel({ onNavigate }) {
     }
   };
   return <div className="terminal-window" onClick={() => inputRef.current?.focus()}>
-    <div className="window-bar"><div className="window-dots"><i/><i/><i/></div><span>reece@portfolio: ~/terminal</span><span className="window-right">bash — 80x24</span></div>
+    <div className="window-bar"><div className="window-dots"><i/><i/><i/></div><span>{rootMode ? 'root' : 'reece'}@portfolio: ~/terminal</span><span className="window-right">bash — 80x24</span></div>
     <div className="terminal-content" ref={scrollRef} aria-live="polite">
-      {lines.map((line, i) => <div className={'terminal-line ' + line.type} key={i}>{line.type === 'command' && <span className="prompt">➜ ~ </span>}{line.text}</div>)}
-      <div className="input-line"><span className="prompt">➜ ~ </span><input ref={inputRef} aria-label="Terminal command" autoComplete="off" spellCheck="false" value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKeyDown} placeholder="enter a command..." /></div>
+      {lines.map((line, i) => <div className={'terminal-line ' + line.type} key={i}>{line.type === 'command' && <span className="prompt">{line.root ? 'root@portfolio:~# ' : '➜ ~ '}</span>}{line.text}</div>)}
+      <div className="input-line"><span className="prompt">{rootMode ? 'root@portfolio:~# ' : '➜ ~ '}</span><input ref={inputRef} aria-label="Terminal command" autoComplete="off" spellCheck="false" value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKeyDown} placeholder="enter a command..." /></div>
     </div>
   </div>;
 }
@@ -74,6 +82,8 @@ function TerminalPanel({ onNavigate }) {
 function App() {
   const navigate = id => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const [menu, setMenu] = useState(false);
+  // Root mode lives at app level so the theme follows project navigation.
+  const [rootMode, setRootMode] = useState(false);
   // Project detail pages use a URL hash, so GitHub Pages needs no router configuration.
   const [activeProject, setActiveProject] = useState(() => ['#project/phishhook', '#project/foxbat'].includes(window.location.hash) ? window.location.hash.split('/')[1] : null);
   useEffect(() => {
@@ -83,9 +93,9 @@ function App() {
   }, []);
   const openProject = (slug) => { window.location.hash = 'project/' + slug; window.scrollTo(0, 0); };
   const closeProject = () => { window.location.hash = 'projects'; setActiveProject(null); setTimeout(() => navigate('projects'), 0); };
-  return <div className="site">
+  return <div className={rootMode ? 'site root-mode' : 'site'}>
     {/* Top navigation; mobile menu uses the menu state. */}
-    <header className="topbar"><a className="brand" href="#home"><span className="brand-mark">&gt;_</span> {profile.name.toLowerCase()}<span className="green">.sec</span></a><nav className={menu ? 'nav open' : 'nav'}>{['about', 'projects', 'skills', 'certifications', 'contact'].map(x => <a key={x} href={'#'+x} onClick={() => setMenu(false)}><span className="green">/</span>{x}</a>)}</nav><button className="menu-toggle" aria-label="Toggle navigation" onClick={() => setMenu(!menu)}>☰</button><span className="availability"><span className="live-dot"/> OPEN TO OPPORTUNITIES</span></header>
+    <header className="topbar"><a className="brand" href="#home"><span className="brand-mark">&gt;_</span> {profile.name.toLowerCase()}<span className="green">.sec</span></a><nav className={menu ? 'nav open' : 'nav'}>{['about', 'projects', 'skills', 'certifications', 'contact'].map(x => <a key={x} href={'#'+x} onClick={() => setMenu(false)}><span className="green">/</span>{x}</a>)}</nav><button className="menu-toggle" aria-label="Toggle navigation" onClick={() => setMenu(!menu)}>☰</button><span className="availability"><span className="live-dot"/> {rootMode ? 'ROOT ACCESS GRANTED' : 'OPEN TO OPPORTUNITIES'}</span></header>
     {activeProject === 'phishhook' ? (
       // Standalone PhishHook detail view. No new React dependencies required.
       <main className="project-detail section content-section" style={{maxWidth: 1100, margin: '0 auto', paddingTop: 100}}>
@@ -152,7 +162,7 @@ function App() {
       </main>
     ) : <main>
       {/* Hero and interactive terminal. */}
-      <section id="home" className="hero section"><div className="hero-copy"><div className="eyebrow"><span className="green">//</span> SYSTEM ACCESS GRANTED <span className="line"/></div><p className="hero-kicker">HELLO WORLD, I'M</p><h1>{profile.name}<span className="green">.</span></h1><div className="title-line"><span className="green">&gt;</span> {profile.title}<span className="cursor">_</span></div><p className="hero-summary">{profile.summary}</p><div className="actions"> <button className="primary" onClick={() => navigate('projects')} > EXPLORE PROJECTS <ArrowUpRight size={16} /> </button> {profile.resume && ( <a className="secondary" href={profile.resume} target="_blank" rel="noopener noreferrer" > <Download size={16} /> RESUME </a> )} </div> <div className="hero-contact"> <button onClick={() => navigate('contact')}> <Mail size={15} /> GET IN TOUCH <ArrowUpRight size={14} /> </button> </div><div className="system-strip"><span><span className="green">●</span> SECURITY CONSOLE</span><span>PORTFOLIO / V2.0</span><span>STATUS: ONLINE</span></div><div className="hero-meta"><span><span className="green">●</span> BUILDING & LEARNING</span><span>BASED IN THE USA</span></div></div><div className="hero-terminal"><div className="terminal-label"><Terminal size={15}/> INTERACTIVE SHELL <span>v2.0</span></div><TerminalPanel onNavigate={navigate}/><div className="terminal-hint">TIP: TRY <code>help</code>, <code>status</code> OR <code>education</code></div></div></section>
+      <section id="home" className="hero section"><div className="hero-copy"><div className="eyebrow"><span className="green">//</span> {rootMode ? 'SUPERUSER ENVIRONMENT' : 'SYSTEM ACCESS GRANTED'} <span className="line"/></div><p className="hero-kicker">HELLO WORLD, I'M</p><h1>{profile.name}<span className="green">.</span></h1><div className="title-line"><span className="green">&gt;</span> {profile.title}<span className="cursor">_</span></div><p className="hero-summary">{profile.summary}</p><div className="actions"> <button className="primary" onClick={() => navigate('projects')} > EXPLORE PROJECTS <ArrowUpRight size={16} /> </button> {profile.resume && ( <a className="secondary" href={profile.resume} target="_blank" rel="noopener noreferrer" > <Download size={16} /> RESUME </a> )} </div> <div className="hero-contact"> <button onClick={() => navigate('contact')}> <Mail size={15} /> GET IN TOUCH <ArrowUpRight size={14} /> </button> </div><div className="system-strip"><span><span className="green">●</span> {rootMode ? 'ROOT CONSOLE' : 'SECURITY CONSOLE'}</span><span>PORTFOLIO / V2.0</span><span>{rootMode ? 'UID: 0 / SIMULATED' : 'STATUS: ONLINE'}</span></div><div className="hero-meta"><span><span className="green">●</span> BUILDING & LEARNING</span><span>BASED IN THE USA</span></div></div><div className="hero-terminal"><div className="terminal-label"><Terminal size={15}/> INTERACTIVE SHELL <span>v2.0</span></div><TerminalPanel onNavigate={navigate} rootMode={rootMode} setRootMode={setRootMode}/><div className="terminal-hint">TIP: TRY <code>help</code>, <code>status</code> OR <code>education</code></div></div></section>
       {/* Background and education summary. */}
       <section id="about" className="section content-section"><div className="section-head"><span className="section-number">01 / ABOUT</span><h2><span className="green">$</span> cat about_me.txt</h2></div><div className="about-grid"><div><p className="lead">Cybersecurity isn't just what I studied. It's what I build.</p><p>I'm a cybersecurity graduate interested in network defense, security operations, and developing tools that make systems safer. I enjoy translating theory into hands-on projects and documenting what I learn along the way.</p><p>My portfolio highlights practical work, including an AI-assisted phishing detection system, as well as ongoing networking and defensive security projects.</p></div><div className="info-panel"><div className="panel-title"><Shield size={16}/> PROFILE.DATA</div><div className="info-row"><span>EDUCATION</span><strong>B.S. Cybersecurity</strong></div><div className="info-row"><span>ACADEMIC HONORS</span><strong>Cum Laude</strong></div><div className="info-row"><span>FOCUS</span><strong>Blue Team / Networking</strong></div><div className="info-row"><span>STATUS</span><strong className="green">Open to Opportunities</strong></div></div></div></section>
       {/* Project cards loaded from src/data.js. */}
