@@ -17,7 +17,7 @@ const intro = [
 ];
 
 // Interactive terminal: command history, keyboard navigation, and section shortcuts.
-function TerminalPanel({ onNavigate, rootMode, setRootMode }) {
+function TerminalPanel({ onNavigate, rootMode, setRootMode, onMatrix }) {
   const [lines, setLines] = useState(intro);
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([]);
@@ -36,7 +36,10 @@ function TerminalPanel({ onNavigate, rootMode, setRootMode }) {
     if (cmd === 'clear') { setLines([]); return; }
     const output = [];
     // Hidden cosmetic root session; no real privileges are granted.
-    if (cmd === 'sudo su') {
+    if (cmd === 'matrix') {
+      onMatrix();
+      output.push({ type: 'success', text: '[ OK ] Matrix session initialized.' });
+    } else if (cmd === 'sudo su') {
       setRootMode(true);
       output.push({ type: 'success', text: '[ ROOT ] Simulated superuser session activated.' });
       output.push({ type: 'muted', text: 'Type exit to return to standard mode.' });
@@ -78,12 +81,82 @@ function TerminalPanel({ onNavigate, rootMode, setRootMode }) {
     </div>
   </div>;
 }
+// Canvas-based Easter egg. All animation stays in the browser.
+function MatrixRain({ rootMode, onClose }) {
+  const canvasRef = useRef(null);
+  const closeRef = useRef(null);
+  useEffect(() => {
+    const previousFocus = document.activeElement;
+    closeRef.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const glyphs = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const size = 18;
+    let width, height, streams;
+    const glyph = () => glyphs[Math.floor(Math.random() * glyphs.length)];
+    const resize = () => {
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = width * ratio;
+      canvas.height = height * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, width, height);
+      streams = Array.from({ length: Math.ceil(width / size) }, () => ({ y: Math.random() * height, speed: .35 + Math.random() * .9, tick: 0 }));
+    };
+    const draw = () => {
+      ctx.fillStyle = 'rgba(0,0,0,.075)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.font = 'bold 18px monospace';
+      streams.forEach((stream, i) => {
+        stream.tick += stream.speed;
+        if (stream.tick < 1) return;
+        stream.tick -= 1;
+        stream.y += size;
+        ctx.save();
+        ctx.translate((i + 1) * size, stream.y);
+        ctx.scale(-1, 1); // Mirror the glyphs like the film-inspired code rain.
+        ctx.fillStyle = rootMode ? '#e52b45' : '#00d84b';
+        ctx.fillText(glyph(), 0, -size);
+        ctx.fillStyle = rootMode ? '#ffd5db' : '#d5ffe2';
+        ctx.fillText(glyph(), 0, 0);
+        ctx.restore();
+        if (stream.y > height + size && Math.random() > .94) stream.y = -Math.random() * 180;
+      });
+    };
+    const keydown = event => {
+      if (event.key === 'Escape') { event.preventDefault(); onClose(); }
+      if (event.key === 'Tab') { event.preventDefault(); closeRef.current?.focus(); }
+    };
+    resize();
+    const timer = window.setInterval(draw, 45);
+    window.addEventListener('resize', resize);
+    window.addEventListener('keydown', keydown);
+    // Stop the animation and restore the page when the overlay closes.
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('keydown', keydown);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [rootMode, onClose]);
+  return <div className="matrix-overlay" role="dialog" aria-modal="true" aria-label="Matrix rain animation">
+    <canvas ref={canvasRef} aria-hidden="true"/>
+    <button ref={closeRef} className="matrix-close" onClick={onClose}>ESC / EXIT MATRIX</button>
+  </div>;
+}
+
 // Page layout: header, homepage, about, projects, skills, certifications, contact.
 function App() {
   const navigate = id => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const [menu, setMenu] = useState(false);
   // Root mode lives at app level so the theme follows project navigation.
   const [rootMode, setRootMode] = useState(false);
+  const [matrixMode, setMatrixMode] = useState(false);
   // Project detail pages use a URL hash, so GitHub Pages needs no router configuration.
   const [activeProject, setActiveProject] = useState(() => ['#project/phishhook', '#project/foxbat'].includes(window.location.hash) ? window.location.hash.split('/')[1] : null);
   useEffect(() => {
@@ -162,7 +235,7 @@ function App() {
       </main>
     ) : <main>
       {/* Hero and interactive terminal. */}
-      <section id="home" className="hero section"><div className="hero-copy"><div className="eyebrow"><span className="green">//</span> {rootMode ? 'SUPERUSER ENVIRONMENT' : 'SYSTEM ACCESS GRANTED'} <span className="line"/></div><p className="hero-kicker">HELLO WORLD, I'M</p><h1>{profile.name}<span className="green">.</span></h1><div className="title-line"><span className="green">&gt;</span> {profile.title}<span className="cursor">_</span></div><p className="hero-summary">{profile.summary}</p><div className="actions"> <button className="primary" onClick={() => navigate('projects')} > EXPLORE PROJECTS <ArrowUpRight size={16} /> </button> {profile.resume && ( <a className="secondary" href={profile.resume} target="_blank" rel="noopener noreferrer" > <Download size={16} /> RESUME </a> )} </div> <div className="hero-contact"> <button onClick={() => navigate('contact')}> <Mail size={15} /> GET IN TOUCH <ArrowUpRight size={14} /> </button> </div><div className="system-strip"><span><span className="green">●</span> {rootMode ? 'ROOT CONSOLE' : 'SECURITY CONSOLE'}</span><span>PORTFOLIO / V2.0</span><span>{rootMode ? 'UID: 0 / SIMULATED' : 'STATUS: ONLINE'}</span></div><div className="hero-meta"><span><span className="green">●</span> BUILDING & LEARNING</span><span>BASED IN THE USA</span></div></div><div className="hero-terminal"><div className="terminal-label"><Terminal size={15}/> INTERACTIVE SHELL <span>v2.0</span></div><TerminalPanel onNavigate={navigate} rootMode={rootMode} setRootMode={setRootMode}/><div className="terminal-hint">TIP: TRY <code>help</code>, <code>status</code> OR <code>education</code></div></div></section>
+      <section id="home" className="hero section"><div className="hero-copy"><div className="eyebrow"><span className="green">//</span> {rootMode ? 'SUPERUSER ENVIRONMENT' : 'SYSTEM ACCESS GRANTED'} <span className="line"/></div><p className="hero-kicker">HELLO WORLD, I'M</p><h1>{profile.name}<span className="green">.</span></h1><div className="title-line"><span className="green">&gt;</span> {profile.title}<span className="cursor">_</span></div><p className="hero-summary">{profile.summary}</p><div className="actions"> <button className="primary" onClick={() => navigate('projects')} > EXPLORE PROJECTS <ArrowUpRight size={16} /> </button> {profile.resume && ( <a className="secondary" href={profile.resume} target="_blank" rel="noopener noreferrer" > <Download size={16} /> RESUME </a> )} </div> <div className="hero-contact"> <button onClick={() => navigate('contact')}> <Mail size={15} /> GET IN TOUCH <ArrowUpRight size={14} /> </button> </div><div className="system-strip"><span><span className="green">●</span> {rootMode ? 'ROOT CONSOLE' : 'SECURITY CONSOLE'}</span><span>PORTFOLIO / V2.0</span><span>{rootMode ? 'UID: 0 / SIMULATED' : 'STATUS: ONLINE'}</span></div><div className="hero-meta"><span><span className="green">●</span> BUILDING & LEARNING</span><span>BASED IN THE USA</span></div></div><div className="hero-terminal"><div className="terminal-label"><Terminal size={15}/> INTERACTIVE SHELL <span>v2.0</span></div><TerminalPanel onNavigate={navigate} rootMode={rootMode} setRootMode={setRootMode} onMatrix={() => setMatrixMode(true)}/><div className="terminal-hint">TIP: TRY <code>help</code>, <code>status</code> OR <code>education</code></div></div></section>
       {/* Background and education summary. */}
       <section id="about" className="section content-section"><div className="section-head"><span className="section-number">01 / ABOUT</span><h2><span className="green">$</span> cat about_me.txt</h2></div><div className="about-grid"><div><p className="lead">Cybersecurity isn't just what I studied. It's what I build.</p><p>I'm a cybersecurity graduate interested in network defense, security operations, and developing tools that make systems safer. I enjoy translating theory into hands-on projects and documenting what I learn along the way.</p><p>My portfolio highlights practical work, including an AI-assisted phishing detection system, as well as ongoing networking and defensive security projects.</p></div><div className="info-panel"><div className="panel-title"><Shield size={16}/> PROFILE.DATA</div><div className="info-row"><span>EDUCATION</span><strong>B.S. Cybersecurity</strong></div><div className="info-row"><span>ACADEMIC HONORS</span><strong>Cum Laude</strong></div><div className="info-row"><span>FOCUS</span><strong>Blue Team / Networking</strong></div><div className="info-row"><span>STATUS</span><strong className="green">Open to Opportunities</strong></div></div></div></section>
       {/* Project cards loaded from src/data.js. */}
@@ -192,6 +265,7 @@ function App() {
       {/* Contact links; resume appears only when profile.resume has a URL. */}
       <section id="contact" className="section content-section contact-section"><div className="section-head"><span className="section-number">05 / CONTACT</span><h2><span className="green">$</span> ./connect.sh</h2></div><p className="lead">Let's build something secure.</p><p>Interested in connecting about cybersecurity, security engineering, or technical opportunities? Reach out below.</p><div className="contact-links"><a href={'mailto:'+profile.email}><Mail size={18}/> EMAIL <ArrowUpRight size={16}/></a><a href={profile.github} target="_blank" rel="noreferrer"><Github size={18}/> GITHUB <ArrowUpRight size={16}/></a><a href={profile.linkedin} target="_blank" rel="noreferrer"><Linkedin size={18}/> LINKEDIN <ArrowUpRight size={16}/></a>{profile.resume && <a href={profile.resume} target="_blank" rel="noreferrer"><Download size={18}/> RESUME <ArrowUpRight size={16}/></a>}</div></section>
     </main>}
+    {matrixMode && <MatrixRain rootMode={rootMode} onClose={() => setMatrixMode(false)}/>}
     {/* Footer and back-to-top link. */}
     <footer><span><span className="green">&gt;_</span> {profile.name.toLowerCase()}.sec</span><span>BUILT WITH REACT · DEPLOYED ON GITHUB PAGES</span><a href="#home">BACK TO TOP ↑</a></footer>
   </div>;
