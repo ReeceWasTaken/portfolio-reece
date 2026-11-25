@@ -944,3 +944,183 @@ footer a {
 .matrix-overlay canvas { display: block; width: 100%; height: 100%; }
 .matrix-close { position: absolute; bottom: 20px; right: 20px; padding: 12px 16px; background: #000; color: #7bff9d; border: 1px solid currentColor; font-size: 12px; }
 .root-mode .matrix-close { color: #ff6575; }
+
+/* Hidden research facility palettes reuse the existing theme variables. */
+.site.blackmesa-mode {
+  --theme-color-1: #e1dcd7;
+  --theme-color-2: #0d0b09;
+  --theme-color-3: #ffba82;
+  --theme-color-4: rgba(91, 64, 42, 0.13);
+  --theme-color-5: rgba(255, 177, 114, 0.025);
+  --theme-color-6: #30261e;
+  --theme-color-7: rgba(13, 11, 9, 0.85);
+  --theme-color-8: #b3aaa3;
+  --theme-color-9: #baa391;
+  --theme-color-10: #4b3828;
+  --theme-color-11: #b1a69d;
+  --theme-color-12: #43362b;
+  --theme-color-13: #a69c93;
+  --theme-color-14: #f8f5f2;
+  --theme-color-15: #a69d96;
+  --theme-color-16: #100b07;
+  --theme-color-17: #ffd5b3;
+  --theme-color-18: #f7cba7;
+  --theme-color-19: #291f17;
+  --theme-color-20: #7b7067;
+  --theme-color-21: #b9a493;
+  --theme-color-22: #7b695a;
+  --theme-color-23: #493a2d;
+  --theme-color-24: #120f0c;
+  --theme-color-25: rgba(156, 105, 63, 0.07);
+  --theme-color-26: #201a15;
+  --theme-color-27: #9b8d82;
+  --theme-color-28: #736254;
+  --theme-color-29: #5d4837;
+  --theme-color-30: #e2d5ca;
+  --theme-color-31: #8d7e72;
+  --theme-color-32: #e9e1db;
+  --theme-color-33: #fff3ea;
+  --theme-color-34: #64564a;
+  --theme-color-35: #7e6f63;
+  --theme-color-36: #dcbfa8;
+  --theme-color-37: #2c241d;
+  --theme-color-38: #f7f0eb;
+  --theme-color-39: #9f948b;
+  --theme-color-40: #a99f97;
+  --theme-color-41: #f0e9e4;
+  --theme-color-42: #403226;
+  --theme-color-43: #17120e;
+  --theme-color-44: #352b22;
+  --theme-color-45: #8c7f75;
+  --theme-color-46: #403227;
+  --theme-color-47: #1d1712;
+  --theme-color-48: #110e0b;
+  --theme-color-49: #ac8362;
+  --theme-color-50: #9b8d81;
+  --theme-color-51: #efb789;
+  --theme-color-52: #634b38;
+  --theme-color-53: #a99f96;
+  --theme-color-54: #44362b;
+  --theme-color-55: #cbb29d;
+  --theme-color-56: #83766b;
+  --theme-color-57: #e8dfd8;
+  --theme-color-58: #bbb1a8;
+  --theme-color-59: #594636;
+  --theme-color-60: #efd2ba;
+  --theme-color-61: #2b1f16;
+  --theme-color-62: #33271e;
+  --theme-color-63: #817367;
+  --theme-color-64: #d4c1b2;
+  --theme-color-65: #4b3a2c;
+  --theme-color-66: #1a1511;
+  --theme-color-67: rgba(255, 160, 82, 0.22);
+  --theme-color-68: rgba(255, 124, 16, 0.035);
+  --theme-color-69: #aea59d;
+  --theme-color-70: rgba(255, 175, 110, 0.18);
+  --theme-color-71: rgba(22, 15, 9, 0.7);
+  --theme-color-72: #ff7f16;
+  --theme-color-73: #f7eee6;
+  --theme-color-74: #e67315;
+  --theme-color-75: #ffb578;
+  --theme-color-76: #100c08;
+  --theme-color-77: #b6ada6;
+}
+.site.aperture-mode {
+  --theme-color-1: #d7dde1;
+  --theme-color-2: #090b0d;
+  --theme-color-3: #82cbff;
+  --theme-color-4: rgba(42, 70, 91, 0.13);
+  --theme-color-5: rgba(114, 196, 255, 0.025);
+  --theme-color-6: #1e2830;
+  --theme-color-7: rgba(9, 11, 13, 0.85);
+  --theme-color-8: #a3acb3;
+  --theme-color-9: #91a9ba;
+  --theme-color-10: #283c4b;
+  --theme-color-11: #9da9b1;
+  --theme-color-12: #2b3943;
+  --theme-color-13: #939ea6;
+  --theme-color-14: #f2f5f8;
+  --theme-color-15: #969fa6;
+  --theme-color-16: #070c10;
+  --theme-color-17: #b3dfff;
+  --theme-color-18: #a7d5f7;
+  --theme-color-19: #172129;
+  --theme-color-20: #67737b;
+  --theme-color-21: #93a9b9;
+  --theme-color-22: #5a6d7b;
+  --theme-color-23: #2d3d49;
+  --theme-color-24: #0c0f12;
+  --theme-color-25: rgba(63, 117, 156, 0.07);
+  --theme-color-26: #151b20;
+  --theme-color-27: #82909b;
+  --theme-color-28: #546673;
+  --theme-color-29: #374d5d;
+  --theme-color-30: #cad8e2;
+  --theme-color-31: #72828d;
+  --theme-color-32: #dbe3e9;
+  --theme-color-33: #eaf6ff;
+  --theme-color-34: #4a5964;
+  --theme-color-35: #63737e;
+  --theme-color-36: #a8c6dc;
+  --theme-color-37: #1d262c;
+  --theme-color-38: #ebf2f7;
+  --theme-color-39: #8b979f;
+  --theme-color-40: #97a1a9;
+  --theme-color-41: #e4ebf0;
+  --theme-color-42: #263540;
+  --theme-color-43: #0e1317;
+  --theme-color-44: #222d35;
+  --theme-color-45: #75828c;
+  --theme-color-46: #273640;
+  --theme-color-47: #12181d;
+  --theme-color-48: #0b0e11;
+  --theme-color-49: #628dac;
+  --theme-color-50: #81909b;
+  --theme-color-51: #89c4ef;
+  --theme-color-52: #385163;
+  --theme-color-53: #96a1a9;
+  --theme-color-54: #2b3a44;
+  --theme-color-55: #9db8cb;
+  --theme-color-56: #6b7983;
+  --theme-color-57: #d8e1e8;
+  --theme-color-58: #a8b3bb;
+  --theme-color-59: #364a59;
+  --theme-color-60: #bad9ef;
+  --theme-color-61: #16222b;
+  --theme-color-62: #1e2a33;
+  --theme-color-63: #677681;
+  --theme-color-64: #b2c6d4;
+  --theme-color-65: #2c3e4b;
+  --theme-color-66: #11161a;
+  --theme-color-67: rgba(82, 182, 255, 0.22);
+  --theme-color-68: rgba(16, 155, 255, 0.035);
+  --theme-color-69: #9da7ae;
+  --theme-color-70: rgba(110, 194, 255, 0.18);
+  --theme-color-71: rgba(9, 17, 22, 0.7);
+  --theme-color-72: #169dff;
+  --theme-color-73: #e6f0f7;
+  --theme-color-74: #158ee6;
+  --theme-color-75: #78c6ff;
+  --theme-color-76: #080d10;
+  --theme-color-77: #a6afb6;
+  --theme-color-14: #f1f6fb;
+  --theme-color-74: #ff9b42;
+}
+
+.brand-mark svg { vertical-align: middle; }
+.site { color: var(--theme-color-1, #d6e1d9); }
+.blackmesa-mode .matrix-close { color: #ff851b; }
+.aperture-mode .matrix-close { color: #26aaff; }
+.aperture-mode .window-dots i:nth-child(2) { background: #ff9b42; }
+.game-transition { position: fixed; inset: 0; z-index: 9998; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; background: #080b10; color: #ff9b42; text-align: center; animation: game-fade 2.3s both; }
+.game-transition strong { font-size: clamp(22px, 5vw, 48px); letter-spacing: .12em; }
+.game-transition > span { font-size: 12px; }
+.cascade-ring { display: grid; place-items: center; width: 140px; height: 140px; border: 3px solid currentColor; border-radius: 50%; font-size: 95px; box-shadow: 0 0 45px #ff851b66; animation: cascade-expand 2s ease-out both; }
+.portal-pair { display: flex; gap: 35px; }
+.portal-pair i { display: block; width: 75px; height: 140px; border: 5px solid #26aaff; border-radius: 50%; box-shadow: 0 0 30px #26aaff88, inset 0 0 20px #26aaff55; animation: portal-open 1s ease-out both; }
+.portal-pair i + i { border-color: #ff9129; box-shadow: 0 0 30px #ff912988, inset 0 0 20px #ff912955; }
+.game-transition.aperture { color: #bce6ff; }
+@keyframes game-fade { 0%, 100% { opacity: 0; } 15%, 75% { opacity: 1; } }
+@keyframes cascade-expand { from { transform: scale(.65); } to { transform: scale(1.15); } }
+@keyframes portal-open { from { transform: scaleX(.08); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .game-transition, .cascade-ring, .portal-pair i { animation: none; } }

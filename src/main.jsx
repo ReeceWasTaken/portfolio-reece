@@ -6,6 +6,27 @@ import { ArrowUpRight, Github, Linkedin, Mail, Terminal, Shield, Cpu, ChevronRig
 import { profile, projects, skills, certificationRoadmap } from './data';
 import './style.css';
 
+// Each hidden session has its own prompt and Matrix palette.
+const sessions = {
+  standard: { prompt: '➜ ~ ', user: 'reece', host: 'portfolio', rain: '#00d84b', head: '#d5ffe2' },
+  root: { prompt: 'root@portfolio:~# ', user: 'root', host: 'portfolio', rain: '#e52b45', head: '#ffd5db' },
+  blackmesa: { prompt: 'freeman@blackmesa:~$ ', user: 'freeman', host: 'blackmesa', rain: '#ff851b', head: '#fff0cf' },
+  aperture: { prompt: 'subject@aperture:~$ ', user: 'subject', host: 'aperture', rain: '#26aaff', head: '#d9f4ff' },
+};
+const messages = {
+  blackmesa: ['[ OK ] HEV suit diagnostics complete.', '[ NOTICE ] Sector C awaiting personnel.', '[ WARNING ] Unforeseen consequences detected.'],
+  aperture: ['Your curiosity has been recorded for science.', 'Excellent typing. A remarkably low bar.', 'The cake server is undergoing maintenance. Indefinitely.'],
+};
+const randomMessage = mode => messages[mode][Math.floor(Math.random() * messages[mode].length)];
+// Corporate emblems from the Half-Life and Portal universe.
+// Aperture geometry: https://commons.wikimedia.org/wiki/File:Aperture_Science.svg
+// Black Mesa is a simplified vector reconstruction of the facility emblem.
+function SessionMark({ mode }) {
+  if (mode === 'blackmesa') return <svg viewBox="0 0 100 100" width="23" height="23" role="img" aria-label="Black Mesa Research Facility"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="7"/><path d="M8 65 L28 65 L39 34 H66 L78 65 H92 A45 45 0 0 1 8 65 Z" fill="currentColor"/></svg>;
+  if (mode === 'aperture') return <svg viewBox="0 0 532 532" width="23" height="23" role="img" aria-label="Aperture Science">{Array.from({length: 8}, (_, i) => <path key={i} d="m165 32c-57 24-105 69-131 127l248-46" fill="currentColor" transform={`rotate(${i * 45} 266 266)`}/>)}</svg>;
+  return <>&gt;_</>;
+}
+
 // Commands supported by the interactive terminal.
 const commands = ['help', 'whoami', 'status', 'education', 'projects', 'skills', 'certifications', 'contact', 'date', 'clear'];
 // Initial terminal output shown when the site loads.
@@ -17,7 +38,9 @@ const intro = [
 ];
 
 // Interactive terminal: command history, keyboard navigation, and section shortcuts.
-function TerminalPanel({ onNavigate, rootMode, setRootMode, onMatrix }) {
+function TerminalPanel({ onNavigate, mode, setMode, onMatrix, onTransition }) {
+  const rootMode = mode === 'root';
+  const session = sessions[mode];
   const [lines, setLines] = useState(intro);
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([]);
@@ -40,15 +63,28 @@ function TerminalPanel({ onNavigate, rootMode, setRootMode, onMatrix }) {
       onMatrix();
       output.push({ type: 'success', text: '[ OK ] Matrix session initialized.' });
     } else if (cmd === 'sudo su') {
-      setRootMode(true);
+      setMode('root');
       output.push({ type: 'success', text: '[ ROOT ] Simulated superuser session activated.' });
       output.push({ type: 'muted', text: 'Type exit to return to standard mode.' });
+    } else if (cmd === 'blackmesa' || cmd === 'aperture') {
+      setMode(cmd);
+      onTransition(cmd);
+      output.push({ type: 'success', text: cmd === 'blackmesa' ? '[ OK ] Black Mesa research network connected.' : '[ OK ] Aperture Science enrichment center connected.' });
+      output.push({ type: 'system', text: randomMessage(cmd) });
+      output.push({ type: 'muted', text: 'Type exit to disconnect.' });
+    } else if (cmd === 'resonance') {
+      onTransition('blackmesa');
+      output.push({ type: 'error', text: '[ SIMULATION ] Resonance cascade detected.' });
+    } else if (cmd === 'cake') {
+      output.push({ type: 'error', text: '[ ERROR ] Cake not found. Please continue testing.' });
+    } else if (cmd === 'glados') {
+      output.push({ type: 'system', text: 'GLaDOS: ' + randomMessage('aperture') });
     } else if (cmd === 'exit' || cmd === 'logout') {
-      setRootMode(false);
-      output.push({ type: 'success', text: rootMode ? '[ OK ] Root session terminated.' : 'Already in standard mode.' });
+      setMode('standard');
+      output.push({ type: 'success', text: mode !== 'standard' ? '[ OK ] Session terminated.' : 'Already in standard mode.' });
     } else if (cmd === 'help') output.push({ type: 'normal', text: 'Available commands: ' + commands.join('  ·  ') });
-    else if (cmd === 'whoami') output.push({ type: 'success', text: rootMode ? 'root' : profile.name + ' — ' + profile.title });
-    else if (cmd === 'status') output.push({ type: 'success', text: rootMode ? 'SYSTEM ONLINE | ROOT ACCESS (SIMULATED) | UID: 0' : 'SYSTEM ONLINE | PORTFOLIO READY | OPEN TO OPPORTUNITIES' });
+    else if (cmd === 'whoami') output.push({ type: 'success', text: mode !== 'standard' ? session.user : profile.name + ' — ' + profile.title });
+    else if (cmd === 'status') output.push({ type: 'success', text: rootMode ? 'SYSTEM ONLINE | ROOT ACCESS (SIMULATED) | UID: 0' : mode !== 'standard' ? 'SYSTEM ONLINE | ' + session.host.toUpperCase() + ' | SIMULATED SESSION' : 'SYSTEM ONLINE | PORTFOLIO READY | OPEN TO OPPORTUNITIES' });
     else if (cmd === 'education') output.push({ type: 'normal', text: 'B.S. Cybersecurity — Cum Laude' });
     else if (cmd === 'certifications') { onNavigate('certifications'); output.push({ type: 'normal', text: 'Opening certification status ...' }); }
     else if (cmd === 'date') output.push({ type: 'normal', text: new Date().toLocaleString() });
@@ -56,7 +92,7 @@ function TerminalPanel({ onNavigate, rootMode, setRootMode, onMatrix }) {
       onNavigate(cmd);
       output.push({ type: 'success', text: 'Opening /' + cmd + ' ...' });
     } else output.push({ type: 'error', text: `Command not found: ${value}. Type "help".` });
-    setLines(prev => [...prev, { type: 'command', text: value, root: rootMode }, ...output]);
+    setLines(prev => [...prev, { type: 'command', text: value, prompt: session.prompt }, ...output]);
   };
   // Up/down arrows cycle through previous commands; Enter runs a command.
   const onKeyDown = (event) => {
@@ -77,15 +113,15 @@ function TerminalPanel({ onNavigate, rootMode, setRootMode, onMatrix }) {
     }
   };
   return <div className="terminal-window" onClick={() => inputRef.current?.focus()}>
-    <div className="window-bar"><div className="window-dots"><i/><i/><i/></div><span>{rootMode ? 'root' : 'reece'}@portfolio: ~/terminal</span><span className="window-right">bash — 80x24</span></div>
+    <div className="window-bar"><div className="window-dots"><i/><i/><i/></div><span>{session.user}@{session.host}: ~/terminal</span><span className="window-right">bash — 80x24</span></div>
     <div className="terminal-content" ref={scrollRef} aria-live="polite">
-      {lines.map((line, i) => <div className={'terminal-line ' + line.type} key={i}>{line.type === 'command' && <span className="prompt">{line.root ? 'root@portfolio:~# ' : '➜ ~ '}</span>}{line.text}</div>)}
-      <div className="input-line"><span className="prompt">{rootMode ? 'root@portfolio:~# ' : '➜ ~ '}</span><input ref={inputRef} aria-label="Terminal command" autoComplete="off" spellCheck="false" value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKeyDown} placeholder="enter a command..." /></div>
+      {lines.map((line, i) => <div className={'terminal-line ' + line.type} key={i}>{line.type === 'command' && <span className="prompt">{line.prompt || sessions.standard.prompt}</span>}{line.text}</div>)}
+      <div className="input-line"><span className="prompt">{session.prompt}</span><input ref={inputRef} aria-label="Terminal command" autoComplete="off" spellCheck="false" value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKeyDown} placeholder="enter a command..." /></div>
     </div>
   </div>;
 }
 // Canvas-based Easter egg. All animation stays in the browser.
-function MatrixRain({ rootMode, onClose }) {
+function MatrixRain({ mode, onClose }) {
   const canvasRef = useRef(null);
   const closeRef = useRef(null);
   const overlayRef = useRef(null);
@@ -124,9 +160,9 @@ function MatrixRain({ rootMode, onClose }) {
         ctx.save();
         ctx.translate((i + 1) * size, stream.y);
         ctx.scale(-1, 1); // Mirror the glyphs like the film-inspired code rain.
-        ctx.fillStyle = rootMode ? '#e52b45' : '#00d84b';
+        ctx.fillStyle = sessions[mode].rain;
         ctx.fillText(glyph(), 0, -size);
-        ctx.fillStyle = rootMode ? '#ffd5db' : '#d5ffe2';
+        ctx.fillStyle = sessions[mode].head;
         ctx.fillText(glyph(), 0, 0);
         ctx.restore();
         if (stream.y > height + size && Math.random() > .94) stream.y = -Math.random() * 180;
@@ -148,10 +184,25 @@ function MatrixRain({ rootMode, onClose }) {
       document.body.style.overflow = previousOverflow;
       previousFocus?.focus();
     };
-  }, [rootMode, onClose]);
+  }, [mode, onClose]);
   return <div ref={overlayRef} tabIndex={-1} className="matrix-overlay" role="dialog" aria-modal="true" aria-label="Matrix rain animation">
     <canvas ref={canvasRef} aria-hidden="true"/>
     <button type="button" ref={closeRef} className="matrix-close" onClick={onClose}>ESC / EXIT MATRIX</button>
+  </div>;
+}
+
+// Short, non-blocking transitions; no audio, external assets, or rapid flashing.
+function GameTransition({ kind, onClose }) {
+  useEffect(() => {
+    const timer = window.setTimeout(onClose, 2300);
+    const key = event => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', key);
+    return () => { window.clearTimeout(timer); window.removeEventListener('keydown', key); };
+  }, [onClose]);
+  return <div className={'game-transition ' + kind} aria-hidden="true">
+    {kind === 'aperture' ? <div className="portal-pair"><i/><i/></div> : <div className="cascade-ring"><SessionMark mode="blackmesa"/></div>}
+    <strong>{kind === 'aperture' ? 'APERTURE SCIENCE' : 'BLACK MESA'}</strong>
+    <span>{kind === 'aperture' ? 'PORTAL LINK ESTABLISHED' : 'RESONANCE CASCADE // SIMULATION'}</span>
   </div>;
 }
 
@@ -160,7 +211,11 @@ function App() {
   const navigate = id => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const [menu, setMenu] = useState(false);
   // Root mode lives at app level so the theme follows project navigation.
-  const [rootMode, setRootMode] = useState(false);
+  const [mode, setMode] = useState('standard');
+  const rootMode = mode === 'root';
+  const [transition, setTransition] = useState(null);
+  const closeTransition = React.useCallback(() => setTransition(null), []);
+  const closeMatrix = React.useCallback(() => setMatrixMode(false), []);
   const [matrixMode, setMatrixMode] = useState(false);
   // Project detail pages use a URL hash, so GitHub Pages needs no router configuration.
   const [activeProject, setActiveProject] = useState(() => ['#project/phishhook', '#project/foxbat'].includes(window.location.hash) ? window.location.hash.split('/')[1] : null);
@@ -171,9 +226,9 @@ function App() {
   }, []);
   const openProject = (slug) => { window.location.hash = 'project/' + slug; window.scrollTo(0, 0); };
   const closeProject = () => { window.location.hash = 'projects'; setActiveProject(null); setTimeout(() => navigate('projects'), 0); };
-  return <div className={rootMode ? 'site root-mode' : 'site'}>
+  return <div className={'site' + (mode === 'standard' ? '' : ' ' + mode + '-mode')}>
     {/* Top navigation; mobile menu uses the menu state. */}
-    <header className="topbar"><a className="brand" href="#home"><span className="brand-mark">&gt;_</span> {profile.name.toLowerCase()}<span className="green">.sec</span></a><nav className={menu ? 'nav open' : 'nav'}>{['about', 'projects', 'skills', 'certifications', 'contact'].map(x => <a key={x} href={'#'+x} onClick={() => setMenu(false)}><span className="green">/</span>{x}</a>)}</nav><button className="menu-toggle" aria-label="Toggle navigation" onClick={() => setMenu(!menu)}>☰</button><span className="availability"><span className="live-dot"/> {rootMode ? 'ROOT ACCESS GRANTED' : 'OPEN TO OPPORTUNITIES'}</span></header>
+    <header className="topbar"><a className="brand" href="#home"><span className="brand-mark"><SessionMark mode={mode}/></span> {profile.name.toLowerCase()}<span className="green">.sec</span></a><nav className={menu ? 'nav open' : 'nav'}>{['about', 'projects', 'skills', 'certifications', 'contact'].map(x => <a key={x} href={'#'+x} onClick={() => setMenu(false)}><span className="green">/</span>{x}</a>)}</nav><button className="menu-toggle" aria-label="Toggle navigation" onClick={() => setMenu(!menu)}>☰</button><span className="availability"><span className="live-dot"/> {rootMode ? 'ROOT ACCESS GRANTED' : 'OPEN TO OPPORTUNITIES'}</span></header>
     {activeProject === 'phishhook' ? (
       // Standalone PhishHook detail view. No new React dependencies required.
       <main className="project-detail section content-section" style={{maxWidth: 1100, margin: '0 auto', paddingTop: 100}}>
@@ -240,7 +295,7 @@ function App() {
       </main>
     ) : <main>
       {/* Hero and interactive terminal. */}
-      <section id="home" className="hero section"><div className="hero-copy"><div className="eyebrow"><span className="green">//</span> {rootMode ? 'SUPERUSER ENVIRONMENT' : 'SYSTEM ACCESS GRANTED'} <span className="line"/></div><p className="hero-kicker">HELLO WORLD, I'M</p><h1>{profile.name}<span className="green">.</span></h1><div className="title-line"><span className="green">&gt;</span> {profile.title}<span className="cursor">_</span></div><p className="hero-summary">{profile.summary}</p><div className="actions"> <button className="primary" onClick={() => navigate('projects')} > EXPLORE PROJECTS <ArrowUpRight size={16} /> </button> {profile.resume && ( <a className="secondary" href={profile.resume} target="_blank" rel="noopener noreferrer" > <Download size={16} /> RESUME </a> )} </div> <div className="hero-contact"> <button onClick={() => navigate('contact')}> <Mail size={15} /> GET IN TOUCH <ArrowUpRight size={14} /> </button> </div><div className="system-strip"><span><span className="green">●</span> {rootMode ? 'ROOT CONSOLE' : 'SECURITY CONSOLE'}</span><span>PORTFOLIO / V2.0</span><span>{rootMode ? 'UID: 0 / SIMULATED' : 'STATUS: ONLINE'}</span></div><div className="hero-meta"><span><span className="green">●</span> BUILDING & LEARNING</span><span>BASED IN THE USA</span></div></div><div className="hero-terminal"><div className="terminal-label"><Terminal size={15}/> INTERACTIVE SHELL <span>v2.0</span></div><TerminalPanel onNavigate={navigate} rootMode={rootMode} setRootMode={setRootMode} onMatrix={() => setMatrixMode(true)}/><div className="terminal-hint">TIP: TRY <code>help</code>, <code>status</code> OR <code>education</code></div></div></section>
+      <section id="home" className="hero section"><div className="hero-copy"><div className="eyebrow"><span className="green">//</span> {rootMode ? 'SUPERUSER ENVIRONMENT' : mode === 'blackmesa' ? 'BLACK MESA RESEARCH FACILITY' : mode === 'aperture' ? 'APERTURE SCIENCE ENRICHMENT CENTER' : 'SYSTEM ACCESS GRANTED'} <span className="line"/></div><p className="hero-kicker">HELLO WORLD, I'M</p><h1>{profile.name}<span className="green">.</span></h1><div className="title-line"><span className="green">&gt;</span> {profile.title}<span className="cursor">_</span></div><p className="hero-summary">{profile.summary}</p><div className="actions"> <button className="primary" onClick={() => navigate('projects')} > EXPLORE PROJECTS <ArrowUpRight size={16} /> </button> {profile.resume && ( <a className="secondary" href={profile.resume} target="_blank" rel="noopener noreferrer" > <Download size={16} /> RESUME </a> )} </div> <div className="hero-contact"> <button onClick={() => navigate('contact')}> <Mail size={15} /> GET IN TOUCH <ArrowUpRight size={14} /> </button> </div><div className="system-strip"><span><span className="green">●</span> {rootMode ? 'ROOT CONSOLE' : mode === 'blackmesa' ? 'BLACK MESA CONSOLE' : mode === 'aperture' ? 'APERTURE CONSOLE' : 'SECURITY CONSOLE'}</span><span>PORTFOLIO / V2.0</span><span>{rootMode ? 'UID: 0 / SIMULATED' : 'STATUS: ONLINE'}</span></div><div className="hero-meta"><span><span className="green">●</span> BUILDING & LEARNING</span><span>BASED IN THE USA</span></div></div><div className="hero-terminal"><div className="terminal-label"><Terminal size={15}/> INTERACTIVE SHELL <span>v2.0</span></div><TerminalPanel onNavigate={navigate} mode={mode} setMode={setMode} onTransition={setTransition} onMatrix={() => { setTransition(null); setMatrixMode(true); }}/><div className="terminal-hint">TIP: TRY <code>help</code>, <code>status</code> OR <code>education</code></div></div></section>
       {/* Background and education summary. */}
       <section id="about" className="section content-section"><div className="section-head"><span className="section-number">01 / ABOUT</span><h2><span className="green">$</span> cat about_me.txt</h2></div><div className="about-grid"><div><p className="lead">Cybersecurity isn't just what I studied. It's what I build.</p><p>I'm a cybersecurity graduate interested in network defense, security operations, and developing tools that make systems safer. I enjoy translating theory into hands-on projects and documenting what I learn along the way.</p><p>My portfolio highlights practical work, including an AI-assisted phishing detection system, as well as ongoing networking and defensive security projects.</p></div><div className="info-panel"><div className="panel-title"><Shield size={16}/> PROFILE.DATA</div><div className="info-row"><span>EDUCATION</span><strong>B.S. Cybersecurity</strong></div><div className="info-row"><span>ACADEMIC HONORS</span><strong>Cum Laude</strong></div><div className="info-row"><span>FOCUS</span><strong>Blue Team / Networking</strong></div><div className="info-row"><span>STATUS</span><strong className="green">Open to Opportunities</strong></div></div></div></section>
       {/* Project cards loaded from src/data.js. */}
@@ -270,7 +325,8 @@ function App() {
       {/* Contact links; resume appears only when profile.resume has a URL. */}
       <section id="contact" className="section content-section contact-section"><div className="section-head"><span className="section-number">05 / CONTACT</span><h2><span className="green">$</span> ./connect.sh</h2></div><p className="lead">Let's build something secure.</p><p>Interested in connecting about cybersecurity, security engineering, or technical opportunities? Reach out below.</p><div className="contact-links"><a href={'mailto:'+profile.email}><Mail size={18}/> EMAIL <ArrowUpRight size={16}/></a><a href={profile.github} target="_blank" rel="noreferrer"><Github size={18}/> GITHUB <ArrowUpRight size={16}/></a><a href={profile.linkedin} target="_blank" rel="noreferrer"><Linkedin size={18}/> LINKEDIN <ArrowUpRight size={16}/></a>{profile.resume && <a href={profile.resume} target="_blank" rel="noreferrer"><Download size={18}/> RESUME <ArrowUpRight size={16}/></a>}</div></section>
     </main>}
-    {matrixMode && <MatrixRain rootMode={rootMode} onClose={() => setMatrixMode(false)}/>}
+    {transition && <GameTransition key={transition} kind={transition} onClose={closeTransition}/>}
+    {matrixMode && <MatrixRain mode={mode} onClose={closeMatrix}/>}
     {/* Footer and back-to-top link. */}
     <footer><span><span className="green">&gt;_</span> {profile.name.toLowerCase()}.sec</span><span>BUILT WITH REACT · DEPLOYED ON GITHUB PAGES</span><a href="#home">BACK TO TOP ↑</a></footer>
   </div>;
