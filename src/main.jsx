@@ -60,7 +60,10 @@ function TerminalPanel({ onNavigate, rootMode, setRootMode, onMatrix }) {
   };
   // Up/down arrows cycle through previous commands; Enter runs a command.
   const onKeyDown = (event) => {
-    if (event.key === 'Enter') execute(input);
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (!event.repeat) execute(input);
+    }
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       const next = Math.min(historyIndex + 1, history.length - 1);
@@ -85,9 +88,11 @@ function TerminalPanel({ onNavigate, rootMode, setRootMode, onMatrix }) {
 function MatrixRain({ rootMode, onClose }) {
   const canvasRef = useRef(null);
   const closeRef = useRef(null);
+  const overlayRef = useRef(null);
   useEffect(() => {
     const previousFocus = document.activeElement;
-    closeRef.current?.focus();
+    // Focus the dialog, not the exit button, when the command opens it.
+    overlayRef.current?.focus();
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const canvas = canvasRef.current;
@@ -144,9 +149,9 @@ function MatrixRain({ rootMode, onClose }) {
       previousFocus?.focus();
     };
   }, [rootMode, onClose]);
-  return <div className="matrix-overlay" role="dialog" aria-modal="true" aria-label="Matrix rain animation">
+  return <div ref={overlayRef} tabIndex={-1} className="matrix-overlay" role="dialog" aria-modal="true" aria-label="Matrix rain animation">
     <canvas ref={canvasRef} aria-hidden="true"/>
-    <button ref={closeRef} className="matrix-close" onClick={onClose}>ESC / EXIT MATRIX</button>
+    <button type="button" ref={closeRef} className="matrix-close" onClick={onClose}>ESC / EXIT MATRIX</button>
   </div>;
 }
 
